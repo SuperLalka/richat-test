@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center">Operation cancelled!</h1>
+
+<div class="button-block text-center">
+	<p>Operation cancelled.</p>
+	<a type="button" class="btn btn-outline-info" href="{% url 'home_page' %}" role="button">
+		Return to main page
+	</a>
+</div>
+
+{% endblock content %}

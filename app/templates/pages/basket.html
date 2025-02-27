@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center">Корзина пользователя</h1>
+
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">name</th>
+		<th scope="col">price</th>
+		<th scope="col">description</th>
+		<th scope="col"></th>
+	</tr>
+	</thead>
+	<tbody>
+	{% for item in basket.items.all %}
+	<tr>
+		<td class="col-id">{{ item.id }}</td>
+		<td class="col-name">{{ item.name }}</td>
+		<td class="col-price">
+			{% for price in item.prices.all %}
+				<p>{{ price.unit_amount }}</p>
+			{% endfor %}
+		</td>
+		<td class="col-description">{{ item.description }}</td>
+		<td>
+			<button class="remove-button">Удалить из корзины</button>
+		</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+<div>
+	<p>Итого к оплате: {{ basket.total_price }}</p>
+	<button class="buy-button">Совершить покупку</button>
+</div>
+{% endblock content %}
+
+{% block modal %}{% endblock modal %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $("button.buy-button").on("click", function () {
+        let allListElements = $("td.col-id");
+        let data = {
+            'items_ids': []
+        };
+
+        $.each(allListElements, function (key, value) {
+            data['items_ids'].push(value.innerText);
+        });
+
+        $.ajax({
+            async: false,
+            type: 'POST',
+            url: `/buy/`,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (data) {
+                $(location).prop('href', data['session_url'])
+            },
+            error: function (jqXHR, exception) {
+                alert('Some error.');
+            }
+        });
+    });
+    $("button.remove-button").on("click", function () {
+        let buying_id = $(this).closest("tr").find(".col-id").html();
+        $.ajax({
+            async: false,
+            type: 'DELETE',
+            url: `/basket/operation/${buying_id}/`,
+        });
+        location.reload();
+    });
+</script>
+{% endblock javascript %}

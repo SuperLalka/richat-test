@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center">Список Items</h1>
+
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">name</th>
+		<th scope="col">price</th>
+		<th scope="col">description</th>
+		<th scope="col"></th>
+	</tr>
+	</thead>
+	<tbody>
+	{% for item in items %}
+	<tr>
+		<td class="col-id">{{ item.id }}</td>
+		<td class="col-name">{{ item.name }}</td>
+		<td class="col-price">
+			{% for price in item.prices.all %}
+				<p>{{ price.unit_amount }}</p>
+			{% endfor %}
+		</td>
+		<td class="col-description">{{ item.description }}</td>
+		<td>
+			{% if item.in_basket %}
+				<p>Уже добавлено в корзину</p>
+				<button class="remove-button">Удалить из корзины</button>
+			{% else %}
+				<button class="add-button">Добавить в корзину</button>
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock content %}
+
+{% block modal %}{% endblock modal %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $("button.add-button").on("click", function () {
+        let buying_id = $(this).closest("tr").find(".col-id").text();
+        $.ajax({
+	        async: false,
+	        type: 'POST',
+	        url: `/basket/operation/${buying_id}/`,
+	      });
+        location.reload();
+    });
+    $("button.remove-button").on("click", function () {
+        let buying_id = $(this).closest("tr").find(".col-id").text();
+        $.ajax({
+	        async: false,
+	        type: 'DELETE',
+	        url: `/basket/operation/${buying_id}/`,
+	      });
+        location.reload();
+    });
+</script>
+{% endblock javascript %}
