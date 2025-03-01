@@ -3,10 +3,9 @@ version: '3'
 volumes:
   rc_postgres_data: {}
   rc_postgres_data_backups: {}
-  rc_local_redis: {}
 
 services:
-  django: &django
+  django:
     build:
       context: .
       dockerfile: ./compose/django/Dockerfile
@@ -21,14 +20,11 @@ services:
       - ./.envs_example/.django
       - ./.envs_example/.postgres
     ports:
-      - "8000:8000"
+      - "5000:5000"
     command: ["sh", "compose/django/start"]
 
   postgres:
-    build:
-      context: .
-      dockerfile: ./compose/postgres/Dockerfile
-    image: rc_postgres
+    image: postgres:15
     container_name: rc_postgres
     restart: always
     volumes:
@@ -38,32 +34,3 @@ services:
       - "5432:5432"
     env_file:
       - ./.envs_example/.postgres
-
-  redis:
-    image: redis:6
-    container_name: rc_redis
-    restart: always
-    volumes:
-      - rc_local_redis:/data
-
-  celeryworker:
-    <<: *django
-    image: rc_celeryworker
-    container_name: rc_celeryworker
-    restart: always
-    depends_on:
-      - redis
-      - postgres
-    ports: []
-    command: /start-celeryworker
-
-  celerybeat:
-    <<: *django
-    image: rc_celerybeat
-    container_name: rc_celerybeat
-    restart: always
-    depends_on:
-      - redis
-      - postgres
-    ports: []
-    command: /start-celerybeat
