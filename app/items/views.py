@@ -87,8 +87,7 @@ def buy(request: Request):
 @require_http_methods(['POST'])
 def webhooks(request: Request):
     try:
-        event = json.loads(request.body)
-        event_obj = event['object']
+        event_obj = json.loads(request.body)
     except Exception:
         return HttpResponse(400)
 
@@ -96,10 +95,9 @@ def webhooks(request: Request):
 
     logger.info("Received webhook with content \n %s", event_obj)
 
-    if event_obj['object'] == 'checkout.session':
-        if event_obj['status'] == 'complete':
-            webhook_handler.complete_checkout_session()
+    if event_obj['type'] == 'checkout.session.completed':
+        webhook_handler.complete_checkout_session()
     else:
-        logger.warning('Unhandled event type {}'.format(event.get('type')))
+        logger.warning('Unhandled event type {}'.format(event_obj.get('type')))
 
     return HttpResponse(200)

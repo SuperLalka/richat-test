@@ -12,7 +12,7 @@ class StripeWebhooksHandler:
     def complete_checkout_session(self) -> None:
         with transaction.atomic():
             session = PaymentSession.objects \
-                .filter(session_id=self.event_obj['id']) \
+                .filter(session_id=self.event_obj['data']['object']['id']) \
                 .select_related('user', 'user__userbasket') \
                 .first()
 
