@@ -1,10 +1,10 @@
-import environ
+import os
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 APPS_DIR = BASE_DIR / "app"
-env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -17,6 +17,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+SITE_DOMAIN = os.getenv('DJANGO_SITE_DOMAIN', 'localhost:8000')
+SITE_SCHEME = os.getenv('DJANGO_SITE_SCHEME', 'http://')
+SITE_URL = os.getenv('DJANGO_SITE_URL', SITE_SCHEME + SITE_DOMAIN)
 
 # Application definition
 
@@ -31,13 +34,13 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'corsheaders',
-    'django_celery_beat',
+    'background_task',
+    'django_crontab',
 ]
 
 LOCAL_APPS = [
     'app.items',
     'app.users',
-    'config.celery_app.CeleryAppConfig'
 ]
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#installed-apps
@@ -49,6 +52,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'config.middlewares.DisableCSRFMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -70,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'config.context_processors.currencies',
             ],
         },
     },
@@ -77,6 +82,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -84,11 +94,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": env.str("POSTGRES_HOST", default="postgres"),
-        "PORT": env.str("POSTGRES_PORT", default="5432"),
-        "NAME": env.str("POSTGRES_DB"),
-        "USER": env.str("POSTGRES_USER"),
-        "PASSWORD": env.str("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get('POSTGRES_HOST'),
+        "PORT": os.environ.get('POSTGRES_PORT'),
+        "NAME": os.environ.get('POSTGRES_DB'),
+        "USER": os.environ.get('POSTGRES_USER'),
+        "PASSWORD": os.environ.get('POSTGRES_PASSWORD'),
         "ATOMIC_REQUESTS": True,
     }
 }
@@ -96,7 +106,6 @@ DATABASES = {
 # Authentication
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -133,13 +142,60 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+# https://docs.djangoproject.com/en/dev/ref/settings/#static-root
+STATIC_ROOT = str(BASE_DIR / "staticfiles")
+# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
+STATIC_URL = "/static/"
+# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = [os.path.join(APPS_DIR, 'static/')]
 
-STATIC_URL = 'static/'
+# Logging
+# https://docs.djangoproject.com/en/dev/ref/settings/#logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "formatter": "verbose",
+            "filename": "/tmp/django.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "propagate": True,
+        },
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# https://github.com/kraiz/django-crontab/blob/master/django_crontab/app_settings.py#L12
+CRONJOBS = [
+    ('* */1 * * *', 'app.items.tasks.sync_products_with_stripe'),
+]
+
+
+TEST_USER_ID = 1
+DEFAULT_CURRENCY = 'usd'

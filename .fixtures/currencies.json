@@ -1,0 +1,42 @@
+[
+  {
+    "model": "items.currency",
+    "pk": "cny",
+    "fields": {
+      "name": "Chinese yuan",
+      "symbol": "¥"
+    }
+  },
+  {
+    "model": "items.currency",
+    "pk": "eur",
+    "fields": {
+      "name": "Euro",
+      "symbol": "€"
+    }
+  },
+  {
+    "model": "items.currency",
+    "pk": "gbp",
+    "fields": {
+      "name": "Sterling",
+      "symbol": "£"
+    }
+  },
+  {
+    "model": "items.currency",
+    "pk": "rub",
+    "fields": {
+      "name": "Russian ruble",
+      "symbol": "₽"
+    }
+  },
+  {
+    "model": "items.currency",
+    "pk": "usd",
+    "fields": {
+      "name": "United States dollar",
+      "symbol": "$"
+    }
+  }
+]

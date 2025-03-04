@@ -49,7 +49,22 @@
 						<li class="nav-item">
 							<a class="nav-link" href="{% url 'basket_page' %}">Basket</a>
 						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'orders_page' %}">Orders</a>
+						</li>
 					</ul>
+				</div>
+				<div class="dropdown">
+					<p>Текущая валюта: {{ currently_currency }}</p>
+					<button class="btn btn-success dropdown-toggle" type="button" id="currencyDropdownMenuButton"
+					        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Указать желаемую валюту
+					</button>
+					<div class="dropdown-menu" aria-labelledby="currencyDropdownMenuButton">
+						{% for currency in currencies %}
+						<button class="dropdown-item" data-iso-name="{{ currency.name_iso }}">{{ currency.symbol }} {{ currency.name_iso|upper }}</button>
+						{% endfor %}
+					</div>
 				</div>
 			</nav>
 		</div>
@@ -93,7 +108,7 @@
 		<link rel="stylesheet"
 		      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css">
 		<!-- Your stuff: Third-party javascript libraries go here -->
-
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.js" integrity="sha512-F/dia2jKME12jwqiYDayeD+Rr/8jTWUD2wfbuJB0bzSwenSEnXsn4qQ/wVyXUCix5bmCAj8xJdtFr2OqUtjLAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<!-- place project specific Javascript in this file -->
 		{% block javascript %}{% endblock javascript %}
 
