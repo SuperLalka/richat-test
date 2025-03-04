@@ -1,7 +1,15 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from app.items.models import Discount, Item, Order, Price, Tax
+from app.items.models import (
+    Currency,
+    Discount,
+    Item,
+    Order,
+    PaymentSession,
+    Price,
+    Tax,
+)
 
 
 @admin.register(Item)
@@ -10,6 +18,12 @@ class ItemAdmin(admin.ModelAdmin):
     list_display_links = list_display[:3]
     search_fields = ['id', 'stripe_obj_id']
     ordering = ['-id']
+
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ['name_iso', 'name', 'symbol']
+    list_display_links = list_display[:2]
 
 
 @admin.register(Price)
@@ -53,3 +67,11 @@ class DiscountAdmin(admin.ModelAdmin):
 class TaxAdmin(admin.ModelAdmin):
     list_display = ['name', 'value']
     list_display_links = list_display
+
+
+@admin.register(PaymentSession)
+class PaymentSessionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'session_id', 'user', 'created_at', 'completed_at']
+    list_display_links = list_display[:2]
+    raw_id_fields = ['user', 'order']
+    ordering = ['-created_at']

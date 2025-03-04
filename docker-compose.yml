@@ -8,7 +8,7 @@ services:
   django:
     build:
       context: .
-      dockerfile: ./compose/django/Dockerfile
+      dockerfile: ./Dockerfile
     image: rc_django
     container_name: rc_django
     restart: always
@@ -20,8 +20,7 @@ services:
       - ./.envs_example/.django
       - ./.envs_example/.postgres
     ports:
-      - "5000:5000"
-    command: ["sh", "compose/django/start"]
+      - "80:80"
 
   postgres:
     image: postgres:15

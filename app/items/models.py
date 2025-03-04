@@ -11,8 +11,6 @@ class Item(models.Model):
 
     stripe_obj_id = models.CharField(default='')
 
-    # currency =
-
     class Meta:
         db_table = 'item'
         verbose_name = _('Item')
@@ -22,12 +20,30 @@ class Item(models.Model):
         return self.name
 
 
+class Currency(models.Model):
+    name_iso = models.CharField(max_length=10, primary_key=True)
+    name = models.CharField(max_length=30, blank=True, default='')
+    symbol = models.CharField(max_length=10, blank=True, default='')
+
+    class Meta:
+        db_table = 'currency'
+        verbose_name = _('Currency')
+        verbose_name_plural = _('Currencies')
+
+    def __str__(self):
+        return self.name_iso
+
+
 class Price(models.Model):
-    currency = models.CharField()
     unit_amount = models.IntegerField(null=True, blank=True, default=None)
 
     stripe_obj_id = models.CharField(default='')
 
+    currency = models.ForeignKey(
+        Currency,
+        on_delete=models.CASCADE,
+        related_name='prices',
+    )
     product = models.ForeignKey(
         Item,
         on_delete=models.CASCADE,
@@ -41,6 +57,33 @@ class Price(models.Model):
 
     def __str__(self):
         return self.stripe_obj_id
+
+    def humanize_unit_amount(self):
+        return '{:.2f}'.format(self.unit_amount/100)
+
+
+class PaymentSession(models.Model):
+    session_id = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='pay_sessions',
+    )
+    order = models.OneToOneField(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='pay_session',
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        db_table = 'payment_session'
+        verbose_name = _('PaymentSession')
+        verbose_name_plural = _('PaymentSessions')
 
 
 class Order(models.Model):

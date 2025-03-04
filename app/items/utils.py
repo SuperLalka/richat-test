@@ -1,5 +1,5 @@
 
-from app.items.models import Item, Price
+from app.items.models import Currency, Item, Price
 from app.utils.stripe import stripe_client
 
 
@@ -14,9 +14,11 @@ def sync_product_with_stripe(stripe_product: dict):
         create_defaults=defaults
     )
 
-    for price in stripe_client.Price.list(product=stripe_product["id"], active=True):
+    for price in stripe_client.Price.list(product=stripe_product['id'], active=True):
+        currency, _ = Currency.objects.get_or_create(name_iso=price['currency'])
+
         defaults = {
-            'currency': price['currency'],
+            'currency': currency,
             'unit_amount': price['unit_amount'],
         }
         Price.objects.update_or_create(

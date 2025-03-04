@@ -20,16 +20,18 @@
 		<td class="col-name">{{ item.name }}</td>
 		<td class="col-price">
 			{% for price in item.prices.all %}
-				<p>{{ price.unit_amount }}</p>
+				<p class="{% if currently_currency == price.currency.name_iso %}text-success{% endif %}">
+					{{ price.currency.symbol }} {{ price.humanize_unit_amount }}
+				</p>
 			{% endfor %}
 		</td>
-		<td class="col-description">{{ item.description }}</td>
+		<td class="col-description">{{ item.description|default_if_none:"Нет описания" }}</td>
 		<td>
 			{% if item.in_basket %}
 				<p>Уже добавлено в корзину</p>
-				<button class="remove-button">Удалить из корзины</button>
+				<button type="button" class="btn btn-outline-danger remove-button">Удалить из корзины</button>
 			{% else %}
-				<button class="add-button">Добавить в корзину</button>
+				<button type="button" class="btn btn-outline-success add-button">Добавить в корзину</button>
 			{% endif %}
 		</td>
 	</tr>

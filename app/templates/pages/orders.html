@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center">Список заказов</h1>
+
+<table class="table table-bordered">
+	<thead class="thead-dark">
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">session_id</th>
+		<th scope="col">user</th>
+		<th scope="col">items</th>
+		<th scope="col">discounts</th>
+		<th scope="col">taxes</th>
+	</tr>
+	</thead>
+	<tbody>
+	{% for order in orders %}
+	<tr>
+		<td class="col-id">{{ order.id }}</td>
+		<td class="col-session-id">{{ order.pay_session.session_id }}</td>
+		<td class="col-user">{{ order.user }}</td>
+		<td class="col-items">
+			<ul class="mr-auto">
+			{% for item in order.items.all %}
+				<li>{{ item.name }} / {{ item.stripe_obj_id }}</li>
+			{% endfor %}
+			</ul>
+		</td>
+		<td class="col-discounts">
+			{% for discount in order.discounts.all %}
+				<p>{{ discount.name }}</p>
+				<p>{{ discount.value }}</p>
+			{% endfor %}
+		</td>
+		<td class="col-taxes">
+			{% for tax in order.taxes.all %}
+				<p>{{ tax.name }}</p>
+				<p>{{ tax.value }}</p>
+			{% endfor %}
+		</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock content %}
+
+{% block modal %}{% endblock modal %}
